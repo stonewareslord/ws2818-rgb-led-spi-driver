@@ -10,12 +10,14 @@ use ws2818_examples::{get_led_num_from_args, sleep_busy_waiting_ms};
 use ws2818_rgb_led_spi_driver::adapter_gen::WS28xxAdapter;
 use ws2818_rgb_led_spi_driver::adapter_spi::WS28xxSpiAdapter;
 use ws2818_rgb_led_spi_driver::encoding::encode_rgb;
+use rand::Rng;
 
 // Example that shows a single moving pixel though the 8x8 led matrix.
 fn main() {
     println!("make sure you have \"SPI\" on your Pi enabled and that MOSI-Pin is connected with DIN-Pin!");
     let mut adapter = WS28xxSpiAdapter::new("/dev/spidev0.0").unwrap();
     let num_leds = get_led_num_from_args();
+    let mut rng = rand::thread_rng();
 
     // note we first aggregate all data and write then all at
     // once! otherwise timings would be impossible to reach
@@ -34,7 +36,7 @@ fn main() {
         adapter.write_encoded_rgb(&data).unwrap();
 
         i = (i + 1) % num_leds;
-        let ms = 1000 / 10; // 100ms / 10Hz
+        let ms = 1000 / 10 + rng.gen_range(0, 10); // 100ms / 10Hz
         let before = Instant::now(); // For printing time this takes
 
         // Using thread::sleep() - DOES NOT WORK - lights turn solid white
